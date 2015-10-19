@@ -15,6 +15,8 @@ public interface GenericSearchDao<T, KEY> {
     boolean exists(KEY id) throws Exception;
 
     Results<T> search(Query query) throws Exception;
+    
+    public Results<T> searchMLT(String id) throws Exception;
 
     long count(String q) throws Exception;
 

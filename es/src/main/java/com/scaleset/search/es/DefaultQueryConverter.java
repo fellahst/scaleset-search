@@ -107,7 +107,9 @@ public class DefaultQueryConverter implements QueryConverter {
 
     @Override
     public FilterBuilder converterFilter(Filter filter) {
-        FilterBuilder result = null;
+    	return ESFilterBuilderConverter.convert(filter);
+    /*	
+    	FilterBuilder result = null;
         if (filter != null) {
             String type = filter.getType();
             FilterConverter converter = filterConverters.get(type);
@@ -115,7 +117,7 @@ public class DefaultQueryConverter implements QueryConverter {
                 result = converter.convert(filter);
             }
         }
-        return result;
+        return result;*/
     }
 
     protected void addPaging(SearchRequestBuilder builder) {
@@ -238,6 +240,9 @@ public class DefaultQueryConverter implements QueryConverter {
         register("date_histogram", new DateHistogramAggregationConverter());
     }
 
+    /**
+     * To deprecate
+     */
     protected void registerDefaultFilterConverters() {
         register("geo_bounding_box", new GeoBoundingBoxFilterConverter());
         register("geo_distance", new GeoDistanceFilterConverter());
@@ -248,6 +253,7 @@ public class DefaultQueryConverter implements QueryConverter {
         register("prefix", new PrefixFilterConverter());
         register("term", new TermFilterConverter());
         register("terms", new TermsFilterConverter());
+        register("range", new RangeFilterConverter());
     }
 
 }

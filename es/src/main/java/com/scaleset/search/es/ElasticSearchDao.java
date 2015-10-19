@@ -1,6 +1,11 @@
 package com.scaleset.search.es;
 
-import com.scaleset.search.*;
+import static org.elasticsearch.client.Requests.createIndexRequest;
+import static org.elasticsearch.client.Requests.deleteIndexRequest;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
@@ -15,14 +20,16 @@ import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.MoreLikeThisQueryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.elasticsearch.client.Requests.createIndexRequest;
-import static org.elasticsearch.client.Requests.deleteIndexRequest;
+import com.scaleset.search.AbstractSearchDao;
+import com.scaleset.search.GenericSearchDao;
+import com.scaleset.search.MLTQuery;
+import com.scaleset.search.Query;
+import com.scaleset.search.QueryBuilder;
+import com.scaleset.search.Results;
 
 public class ElasticSearchDao<T, K> extends AbstractSearchDao<T, K> implements GenericSearchDao<T, K> {
 
@@ -108,6 +115,7 @@ public class ElasticSearchDao<T, K> extends AbstractSearchDao<T, K> implements G
 
         BulkResponse bulkResponse = bulkRequest.execute().actionGet();
         if (bulkResponse.hasFailures()) {
+        	
             log.error("Bulk ingest has errors");
         }
         return result;
@@ -128,6 +136,45 @@ public class ElasticSearchDao<T, K> extends AbstractSearchDao<T, K> implements G
         Results<T> results = createResultsConverter(updated, response, mapping).convert();
         return results;
     }
+    
+    public Results<T> searchMLT(String id) throws Exception {
+    	MLTQuery query  = new MLTQuery();
+		query.setId(id);
+		query.setMinDocFreq(1);
+		query.setMinTermFreq(1);
+		return searchMLT(query);
+		
+    }
+   
+    public Results<T> searchMLT(MLTQuery query) throws Exception {
+    	MoreLikeThisQueryBuilder mltQueryBuilder;
+    	
+    	String[] fields = query.getFields();
+		if (fields!=null && fields.length!=0) {
+			mltQueryBuilder = new MoreLikeThisQueryBuilder(fields);
+		}
+		else
+			mltQueryBuilder = new MoreLikeThisQueryBuilder();
+		mltQueryBuilder.ids(query.getId());
+		mltQueryBuilder.minDocFreq(query.getMinDocFreq());
+		mltQueryBuilder.minTermFreq(query.getMinTermFreq());
+		mltQueryBuilder.minWordLength(query.getMinWordLen());
+		mltQueryBuilder.maxDocFreq(query.getMaxDocFreq());
+		mltQueryBuilder.maxQueryTerms(query.getMaxQueryTerms());
+		mltQueryBuilder.maxWordLength(query.getMaxWordLen());
+		mltQueryBuilder.boost(query.getBoost());
+		mltQueryBuilder.boostTerms(query.getBoostTerms());
+		mltQueryBuilder.percentTermsToMatch(query.getPercentTermsToMatch());
+		
+		
+	//	mltQueryBuilder.minimumShouldMatch("5%");
+		SearchResponse searchResponse = client.prepareSearch("mapregistry").setTypes("map").setQuery(mltQueryBuilder).setFrom(query.getOffset()).setSize(query.getLimit()).execute().actionGet();
+		
+        Results<T> results = createResultsConverter(query, searchResponse, mapping).convert();
+        return results;
+    }
+ 
+  
 
     public SearchRequestBuilder convert(Query query) throws Exception {
         return createConverter(query).searchRequest();

@@ -64,4 +64,7 @@ public class Filter extends Extensible {
     public void setClause(Occur clause) {
         this.clause = clause;
     }
+    
+    
+  
 }

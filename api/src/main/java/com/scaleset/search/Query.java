@@ -27,7 +27,8 @@ public class Query {
 
     private int limit;
 
-    private int offset = 0;
+    
+	private int offset = 0;
 
     private Map<String, Object> headers = new HashMap<>();
 
@@ -83,6 +84,10 @@ public class Query {
         return echo;
     }
 
+    public void setFields(String...fields) {
+    	this.fields = fields;
+    }
+    
     public String[] getFields() {
         return fields;
     }
@@ -111,15 +116,31 @@ public class Query {
         return q;
     }
 
+    
+    public void setSorts(Sort[] sorts) {
+    	this.sorts = sorts;
+    }
+    
     public Sort[] getSorts() {
         return sorts;
     }
 
     public boolean isEcho() {
         return echo;
+        
+        
     }
 
     public void setEcho(boolean echo) {
         this.echo = echo;
     }
+    
+    public void setLimit(int limit) {
+		this.limit = limit;
+	}
+
+	public void setOffset(int offset) {
+		this.offset = offset;
+	}
+
 }
