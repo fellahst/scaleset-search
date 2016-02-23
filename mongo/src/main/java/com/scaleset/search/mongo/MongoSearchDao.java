@@ -95,4 +95,10 @@ public class MongoSearchDao<T, K> extends AbstractSearchDao<T, K> {
         return entity;
     }
 
+	@Override
+	public Results<T> searchMLT(String id) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
