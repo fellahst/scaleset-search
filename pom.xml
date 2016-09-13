@@ -41,7 +41,7 @@
 
     <modules>
         <module>api</module>
-        <module>mongo</module>
+    <!--    <module>mongo</module> -->
         <module>es</module>
     </modules>
 
